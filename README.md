@@ -26,7 +26,7 @@ Installation
 Clone the repository or download it directly from GitHub.
 
 ```bash
-git clone https://github.com/<username>/MemoryManager.git
+git clone https://github.com/NeiAozora/MemoryManager.git
 Include the library in your project:
 ```
 

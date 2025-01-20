@@ -59,7 +59,7 @@ $memory->writeBytes($bytes);
 // $data = 'Hello, World!';
 // or 
 // $data = file_get_contents("example.png");
-// $memory->writeBytes($data);
+// $memory->write($data);
 
 
 // Read back the data

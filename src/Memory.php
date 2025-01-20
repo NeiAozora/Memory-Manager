@@ -24,7 +24,7 @@ abstract class Memory
      * 
      * This constructor also creates a weak reference to the current instance.
      * 
-     * @throws Exception If the stream cannot be opened
+     * @throws IOException If the stream cannot be opened
      */
     public function __construct()
     {
@@ -130,15 +130,7 @@ abstract class Memory
         return array_map('ord', str_split($data));
     }
 
-
-    /**
-     * Close the memory stream.
-     * 
-     * This method ensures that the memory stream is closed properly. It is automatically called by the destructor.
-     * After closing, the memory or file resource is released.
-     */
-    public function close()
-    {
+    public function __destruct(){
         fclose($this->stream);
     }
 }

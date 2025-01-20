@@ -4,7 +4,7 @@
 
 ## Overview
 
-The **MemoryManager** library provides an easy and efficient way to manipulate byte data and manage memory streams in PHP. With this library, you can assign, manipulate, and read bytes from memory, or switch to temporary file storage when needed. Perfect for handling data-heavy use cases like working with `.png`, `.wad`, or other binary file types, and can be able to use everywhere without adding reference counting, and will be really destroyed when unset().
+The **MemoryManager** library provides an easy and efficient way to manipulate byte data and manage memory streams in PHP. With this library, you can assign, manipulate, and read bytes from memory or switch to temporary file storage when needed. It's perfect for handling data-heavy use cases, such as working with `.png`, `.wad`, or other binary file types. It can be used anywhere without the need for reference counting, and memory will be immediately destroyed when unset() is called.
 
 The library uses a **base class (`Memory`)** for abstracting PHP's `fopen` functionality, offering two implementations out of the box:  
 - **`MemoryStream`**: Allocates memory in RAM for byte manipulation.  
@@ -22,7 +22,7 @@ $streamMem->writeBytes($arrayOfBytes);
 $data = $streamMem->readBytes();
 ```
 
-Installation
+## Installation
 Clone the repository or download it directly from GitHub.
 
 ```bash
@@ -36,6 +36,7 @@ or install it through composer
 composer require neiaozora/memory-manager
 ```
 
+## Usage
 
 ```php
 require_once 'vendor/autoload.php';
@@ -49,13 +50,13 @@ use NeiAozora\MemoryManager\TempMemory;
 
 use NeiAozora\MemoryManager\MemoryStream;
 
-$memory = new MemoryStream(); // the base class Memory is weak referenced by default, so it will really be destroyed when unset()
+$memory = new MemoryStream(); // The base class Memory is weakly referenced by default, so it will be destroyed immediately when unset()
 
-// Write an array of bytes (0-255) to the memory
+// Write an array of bytes (8-bit values between 0 and 255) to memory
 $bytes = [1, 2, 3, 4, 255];
 $memory->writeBytes($bytes);
 
-// write an binary data in string to the memory, don't ask me why string, ask php due to its quirks
+// Write binary data as a string to memory (don't ask me why it's a string, ask PHP due to its quirks)
 // $data = 'Hello, World!';
 // or 
 // $data = file_get_contents("example.png");
@@ -67,10 +68,10 @@ $data = $memory->readBytes();
 print_r($data); // Outputs: [1, 2, 3, 4, 255]
 
 // Read data from the stream
-$data = $tempMemory->read();
+$data = $memory->read();
 echo $data;
 
-// Will Release be released, memory when it's done and no longer needed
+// The memory will be released once it's no longer needed
 unset($memory);
 
 
@@ -90,9 +91,10 @@ echo $data;
 
 // Release memory
 unset($tempMemory);
+
 ```
 
-## 2. Using with Custom File Formats
+## Using with Custom File Formats
 Easily handle file data like .png or .wad by reading their raw bytes into memory, manipulating the byte data, and writing it back.
 
 ```php

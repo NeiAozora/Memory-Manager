@@ -4,9 +4,9 @@
 
 ## Overview
 
-The **MemoryManager** library provides an easy and efficient way to manipulate byte data and manage memory streams in PHP. With this library, you can assign, manipulate, and read bytes from memory or switch to temporary file storage when needed. It's perfect for handling data-heavy use cases, such as working with `.png`, `.wad`, or other binary file types. It can be used anywhere without the need for reference counting, and memory will be immediately destroyed when unset() is called.
+The **MemoryManager** library provides an easy and efficient way to manipulate byte data and manage memory streams in PHP. With this library, you can assign, manipulate, and read bytes from memory or switch to temporary file storage when needed. It's perfect for handling data-heavy use cases, such as working with `.png`, `.wad`, or other binary file types. It uses Weak Reference built in, so that it can be used anywhere without the need for reference counting, and memory will be immediately destroyed when unset() is called.
 
-The library uses a **base class (`Memory`)** for abstracting PHP's `fopen` functionality, offering two implementations out of the box:  
+The library uses a **base class (`Memory`)** for abstracting it's functionality, the library has provided two implementations out of the box:  
 - **`MemoryStream`**: Allocates memory in RAM for byte manipulation.  
 - **`TempMemory`**: Starts with memory storage but transitions to temporary files for large data.  
 

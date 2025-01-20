@@ -1,0 +1,19 @@
+{
+    "name": "neiaozora/memory-manager",
+    "authors": [
+        {
+            "name" : "Ahmad Fauzan",
+            "email" : "noxindocraft@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0"
+    },
+    "version": "1.0",
+    "autoload": {
+        "psr-4": {
+            "Neiaozora\\MemoryManager\\": "src"
+        }
+    }
+}

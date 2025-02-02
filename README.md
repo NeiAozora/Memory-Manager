@@ -123,7 +123,7 @@ use NeiAozora\MemoryManager\TempMemory;
 
 use NeiAozora\MemoryManager\MemoryStream;
 
-$memory = new MemoryStream(); // The base class Memory is weakly referenced by default, so it will be destroyed immediately when unset()
+$memory = new MemoryStream(); // uses Hard reference mode
 
 // Write an array of bytes (8-bit values between 0 and 255) to memory
 $bytes = [1, 2, 3, 4, 255];
@@ -219,7 +219,6 @@ class CustomMemory extends Memory
 
 **Behavior**:
 - When `$mem` is created, it holds a strong reference to the `MemoryStream` object.
-- Writing 512KB of data increases memory usage.
 - Calling `unset($mem)` explicitly frees the memory, reducing memory usage.
 
 **Use Case**: Ideal for scenarios where you need full control over memory management.
@@ -229,7 +228,6 @@ class CustomMemory extends Memory
 
 **Behavior**:
 - When `$weakRefMemory` is created, it holds a weak reference to the `MemoryStream` object.
-- Writing 512KB of data increases memory usage.
 - Calling `$weakRefMemory->get()->destroy()` explicitly frees the memory, reducing memory usage.
 
 **Use Case**: Ideal for scenarios where you want to avoid memory leaks and rely on automatic garbage collection.

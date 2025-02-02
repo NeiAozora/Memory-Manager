@@ -273,11 +273,11 @@ Do not assign the object referenced by a weak reference to any new variable or h
 
 ## Why Weak References?
 
-Weak references are essential for efficient memory management in low-level operations. The library uses PHP's `WeakReference` to avoid increasing reference counts, allowing objects to be garbage-collected when no longer referenced. However, you can explicitly free memory by calling `unset()` or `destroy()`.
+Weak references are essential for efficient memory management in low-level operations. The library uses PHP's `WeakReference` to avoid increasing reference counts, allowing objects to be garbage-collected when no longer referenced. However, you can explicitly free memory `destroy()`.
 
 ### Key Points:
 - Objects are eligible for garbage collection when no other references exist.
-- Explicitly call `unset($object)` or `destroy()` to free memory immediately.
+- Explicitly call `destroy()` to free memory immediately.
 - Weak references prevent memory leaks in long-running applications.
 
 ## Supported PHP Versions

@@ -8,7 +8,7 @@ namespace NeiAozora\MemoryManager;
  * A memory stream implementation that uses `php://memory` for memory storage.
  * This stream will remain in memory and cannot switch to a temporary file like `php://temp`.
  * The class supports writing to the stream, reading from it, and closing the stream when no longer needed.
- * This Class is WeakReferenced by default when the object is instantiated.
+ * Please refer to NeiAozora\Memory class docblock for more information on detail of the weak reference usage on this utility.
  * 
  * @package MemoryManager
  */
@@ -21,7 +21,7 @@ class MemoryStream extends Memory
      * 
      * @throws IOException If the memory stream cannot be opened
      */
-    protected function openStream()
+    protected function openStream() : void
     {
         $this->stream = fopen('php://memory', 'wb+');
 

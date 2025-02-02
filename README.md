@@ -4,39 +4,112 @@
 
 ## Overview
 
-The **MemoryManager** library provides an easy and efficient way to manipulate byte data and manage memory streams in PHP. With this library, you can assign, manipulate, and read bytes from memory or switch to temporary file storage when needed. It's perfect for handling data-heavy use cases, such as working with `.png`, `.wad`, or other binary file types. It uses Weak Reference built in, so that it can be used anywhere without the need for reference counting, and memory will be immediately destroyed when unset() is called.
+The **MemoryManager** library provides an efficient and intuitive way to manipulate byte data and manage memory streams in PHP. It is designed for handling data-heavy use cases, such as working with binary files like `.png`, `.wad`, or other formats. The library supports two memory management systems:
 
-The library uses a **base class (`Memory`)** for abstracting it's functionality, the library has provided two implementations out of the box:  
-- **`MemoryStream`**: Allocates memory in RAM for byte manipulation.  
-- **`TempMemory`**: Starts with memory storage but transitions to temporary files for large data.  
+- **Hard Reference System**: Traditional PHP object references with manual memory management.
+- **Weak Reference System**: Uses PHP's `WeakReference` to allow automatic garbage collection when objects are no longer referenced.
+
+The library is built around a base class (`Memory`) that abstracts core functionality. Two implementations are provided out of the box:
+- **`MemoryStream`**: Allocates memory in RAM for byte manipulation.
+- **`TempMemory`**: Starts with memory storage but switches to temporary files for large data.
 
 ## Features
 
-- **Easy Byte Manipulation**: Write and read byte arrays seamlessly.
-- **Memory and Temp Storage**: Dynamically allocate memory or use temporary file storage as needed.
-- **Weak Reference Support**: Class objects are weak-referenced by default to prevent reference counting issues and allow garbage collection when not in use.
-- **Extensibility**: Extend the `Memory` base class to create custom implementations for specific storage requirements.
-- **Simple API**: Write and read bytes with minimal code:
-```php
-$streamMem->writeBytes($arrayOfBytes);
-$data = $streamMem->readBytes();
-```
+- **Byte Manipulation**: Easily write and read byte arrays or binary data.
+- **Dynamic Storage**: Use in-memory storage for small data or transition to temporary files for larger datasets.
+- **Dual Memory Management**:
+  - **Hard Reference System**: Traditional PHP references with explicit memory management.
+  - **Weak Reference System**: Automatic garbage collection using `WeakReference`.
+- **Extensible**: Extend the `Memory` base class to create custom storage solutions.
+- **Simple API**: Perform operations with minimal code:
+  ```php
+  $streamMem->writeBytes($arrayOfBytes);
+  $data = $streamMem->readBytes();
+  ```
 
 ## Installation
-Clone the repository or download it directly from GitHub.
 
-```bash
-git clone https://github.com/NeiAozora/MemoryManager.git
-Include the library in your project:
-```
+### Via Composer
 
-or install it through composer
+Install the library using Composer:
 
 ```bash
 composer require neiaozora/memory-manager
 ```
 
+### Manual Installation
+
+Clone the repository or download it directly from GitHub:
+
+```bash
+git clone https://github.com/NeiAozora/MemoryManager.git
+```
+
+Include the library in your project:
+
+```php
+require_once 'vendor/autoload.php';
+```
+
 ## Usage
+
+### Example: Demonstrating Hard Reference and Weak Reference Systems
+
+The following example demonstrates the hard reference and weak reference systems using the `MemoryStream` class. It also includes a `printMemoryUsage()` function to debug memory usage.
+
+```php
+use NeiAozora\MemoryManager\MemoryStream;
+
+require_once "vendor/autoload.php";
+
+// Function to debug memory usage
+function printMemoryUsage() {
+    $bytes = memory_get_usage();
+    $kilobytes = $bytes / 1024;
+    $megabytes = $kilobytes / 1024;
+
+    printf(
+        "Memory Usage: %d Bytes | %.2f KB | %.2f MB\n",
+        $bytes,
+        $kilobytes,
+        $megabytes
+    );
+}
+
+// File size is 512KB
+$file = "random.bin";
+
+// Print initial memory usage
+printMemoryUsage();
+
+// 1. Hard Reference System
+$mem = new MemoryStream(); // Creates a hard-referenced object
+$mem->write(file_get_contents($file)); // Writes 512KB of data to memory
+
+// Print memory usage after writing data
+printMemoryUsage();
+
+// Free memory by unsetting the hard reference
+unset($mem);
+
+// Print memory usage after freeing memory
+printMemoryUsage();
+
+// 2. Weak Reference System
+$weakRefMemory = MemoryStream::new(); // Creates a weak-referenced object
+$weakRefMemory->get()->write(file_get_contents($file)); // Writes 512KB of data to memory
+
+// Print memory usage after writing data
+printMemoryUsage();
+
+// Free memory by destroying the weak reference
+$weakRefMemory->get()->destroy();
+
+// Print memory usage after freeing memory
+printMemoryUsage();
+```
+
+## Another usage examples
 
 ```php
 require_once 'vendor/autoload.php';
@@ -138,26 +211,87 @@ class CustomMemory extends Memory
     }
 }
 ```
-## Why Weak References?
-When dealing with low-level memory management, efficiency is key. The library uses PHP's WeakReference to avoid increasing reference counts when memory streams are passed around in the application. This allows the objects to be eligible for garbage collection when they are no longer referenced, but you must explicitly call unset() to trigger the cleanup process.
 
-This means:
+## Memory Management Systems Explained
 
-The object won't increase its reference count, and PHP can decide to clean it up automatically once there are no other references left.
-While weak references help manage memory efficiently by allowing PHP’s garbage collector to clean up unreferenced objects, it’s still a good practice to call unset($object) to explicitly free the memory at the right time.
-For example:
+### 1. Hard Reference System
+**How It Works**: Objects are created using traditional PHP references. Memory is managed manually by calling `unset()`.
+
+**Behavior**:
+- When `$mem` is created, it holds a strong reference to the `MemoryStream` object.
+- Writing 512KB of data increases memory usage.
+- Calling `unset($mem)` explicitly frees the memory, reducing memory usage.
+
+**Use Case**: Ideal for scenarios where you need full control over memory management.
+
+### 2. Weak Reference System
+**How It Works**: Objects are wrapped in PHP's `WeakReference`, allowing them to be garbage-collected when no longer referenced. You can still explicitly free memory using `destroy()`.
+
+**Behavior**:
+- When `$weakRefMemory` is created, it holds a weak reference to the `MemoryStream` object.
+- Writing 512KB of data increases memory usage.
+- Calling `$weakRefMemory->get()->destroy()` explicitly frees the memory, reducing memory usage.
+
+**Use Case**: Ideal for scenarios where you want to avoid memory leaks and rely on automatic garbage collection.
+
+## Detailed Explanation of Weak Reference Usage Rules
+
+### Important Weak Reference Usage Rules
+
+When using the weak reference system with `::new()`, observe the following rules to ensure proper memory management:
+
+### 1. Do Not Assign the Weakly Referenced Object to a Strong Reference
+When calling `$weakRefMemory->get()`, it returns a strong reference to the object. If you assign this strong reference to another variable, it increments the reference count, preventing the object from being freed as expected by the garbage collector.
+
+**Example of Incorrect Usage**:
 
 ```php
-// The Memory class is weak-referenced by default, so the object is eligible for garbage collection.
-$memory = new MemoryStream();
-
-// The object is freed when `unset($memory)` is called.
-unset($memory); // This ensures the object is destroyed immediately.
+$weakRefMemory = MemoryStream::new(); // The object of Memory class now has a reference count of 1 (held inside the Class $memory attribute).
+$mem = $weakRefMemory->get();  // This creates a strong reference to the object, increasing the reference count to 2.
+$mem->destroy();                // This only frees the reference from within the Class $memory attribute, reducing the reference count to 1.
+unset($mem);                    // Now the object may be freed because $mem was the strong reference holding the last reference to the object.
 ```
 
-# Supported PHP Versions
-PHP 7.4+
-Compatible with PHP 8.x
+**Why This Breaks the Intended Lifecycle**:
+- The object remains alive as long as `$mem` holds the strong reference, preventing it from being freed until `unset($mem)` is called.
 
-# Contributing
-Feel free to contribute to the project! Submit pull requests or report issues in the GitHub repository.
+### 2. Only Use `WeakReference::get()` Directly
+Manipulate the object directly using the weak reference wrapper without creating a strong reference. This ensures the object can be freed as soon as it is no longer in use.
+
+**Example of Correct Usage**:
+
+```php
+$weakRefMemory = MemoryStream::new();
+$weakRefMemory->get()->write(file_get_contents($file)); // Write data
+$weakRefMemory->get()[0] = 0;  // Assign byte value 0 to offset 0
+$weakRefMemory->get()->destroy();  // Frees memory when done
+```
+
+**Why This Works**:
+- The object is only weakly referenced, and it will be freed when no other strong references remain.
+
+### Key Rule:
+Do not assign the object referenced by a weak reference to any new variable or hold a strong reference to it after calling `get()`. This ensures the object can be freed when it's no longer needed.
+
+## Why Weak References?
+
+Weak references are essential for efficient memory management in low-level operations. The library uses PHP's `WeakReference` to avoid increasing reference counts, allowing objects to be garbage-collected when no longer referenced. However, you can explicitly free memory by calling `unset()` or `destroy()`.
+
+### Key Points:
+- Objects are eligible for garbage collection when no other references exist.
+- Explicitly call `unset($object)` or `destroy()` to free memory immediately.
+- Weak references prevent memory leaks in long-running applications.
+
+## Supported PHP Versions
+
+- Only PHP 8+
+
+## Contributing
+
+Contributions are welcome! Feel free to:
+- Submit pull requests.
+- Report issues or suggest improvements in the GitHub repository.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.

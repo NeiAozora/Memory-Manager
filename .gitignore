@@ -1,0 +1,9 @@
+vendor/
+index.php
+test.php
+composer.lock
+php-runtime
+run.sh
+run.bat
+.stubs/
+random.bin
